@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -7,6 +8,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/context/AuthContext';
 import Icon from '@/components/ui/icon';
 
 const navLinks = [
@@ -21,6 +31,8 @@ const navLinks = [
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const { user, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -57,11 +69,51 @@ const Header = () => {
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <Button variant="ghost" size="sm" className="gap-2 text-muted-foreground hover:text-gold">
-            <Icon name="User" size={16} />
-            Кабинет
-          </Button>
-          <Button className="gold-gradient font-medium text-primary-foreground hover:opacity-90">
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="gap-2 text-foreground hover:text-gold">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full gold-gradient text-xs font-medium text-primary-foreground">
+                    {user.name?.[0]}
+                  </span>
+                  {user.name}
+                  <Icon name="ChevronDown" size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 border-border bg-card">
+                <DropdownMenuLabel className="text-muted-foreground">{user.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-border" />
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => navigate('/admin')} className="cursor-pointer">
+                    <Icon name="LayoutDashboard" size={15} className="mr-2 text-gold" />
+                    Панель управления
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive">
+                  <Icon name="LogOut" size={15} className="mr-2" />
+                  Выйти
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="gap-2 text-muted-foreground hover:text-gold"
+            >
+              <Link to="/login">
+                <Icon name="User" size={16} />
+                Кабинет
+              </Link>
+            </Button>
+          )}
+          <Button
+            className="gold-gradient font-medium text-primary-foreground hover:opacity-90"
+            onClick={() => {
+              document.querySelector('#booking')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
             Забронировать
           </Button>
         </div>
@@ -88,6 +140,22 @@ const Header = () => {
                   {link.label}
                 </a>
               ))}
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <Link to="/admin" className="text-lg font-medium uppercase tracking-wider text-gold">
+                      Панель управления
+                    </Link>
+                  )}
+                  <button onClick={logout} className="text-left text-lg font-medium uppercase tracking-wider text-destructive">
+                    Выйти
+                  </button>
+                </>
+              ) : (
+                <Link to="/login" className="text-lg font-medium uppercase tracking-wider text-muted-foreground hover:text-gold">
+                  Кабинет
+                </Link>
+              )}
               <Button className="mt-4 gold-gradient font-medium text-primary-foreground">
                 Забронировать
               </Button>

@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Accordion,
   AccordionContent,
@@ -7,35 +9,27 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import Icon from '@/components/ui/icon';
+import { contentApi } from '@/lib/api';
 
-const faqs = [
-  {
-    q: 'За сколько времени нужно бронировать авто?',
-    a: 'Рекомендуем бронировать за 1–2 дня. Но чаще всего мы можем подать автомобиль уже через 2–3 часа после заявки.',
-  },
-  {
-    q: 'Есть ли ограничение по пробегу?',
-    a: 'На тарифах «Премиум» и «VIP» пробег безлимитный. На тарифе «Стандарт» — 200 км в сутки, далее 30 ₽ за км.',
-  },
-  {
-    q: 'Как происходит оплата?',
-    a: 'Оплатить можно банковской картой онлайн, переводом или наличными при получении. Депозит блокируется на карте.',
-  },
-  {
-    q: 'Можно ли арендовать авто с водителем?',
-    a: 'Да, на тарифе VIP доступна услуга личного водителя. Также её можно подключить к любому тарифу за доплату.',
-  },
-  {
-    q: 'Что входит в доставку автомобиля?',
-    a: 'Доставка в пределах города — бесплатно. Привезём авто к дому, в офис, аэропорт или отель в удобное время.',
-  },
-  {
-    q: 'Как работает личный кабинет?',
-    a: 'В личном кабинете вы управляете бронированиями, отслеживаете статус доставки, храните документы и копите бонусы.',
-  },
-];
+interface FaqItem {
+  id: number;
+  question: string;
+  answer: string;
+  sort_order?: number;
+}
 
 const Faq = () => {
+  const [faqs, setFaqs] = useState<FaqItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    contentApi
+      .list<FaqItem>('faqs')
+      .then(setFaqs)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <section id="faq" className="py-24 bg-secondary/30 noise-bg">
       <div className="container">
@@ -47,16 +41,24 @@ const Faq = () => {
         </div>
 
         <div className="mx-auto max-w-3xl">
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="mb-3 rounded-lg border border-border bg-card px-5">
-                <AccordionTrigger className="text-left font-display text-lg hover:text-gold hover:no-underline">
-                  {faq.q}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">{faq.a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          {loading ? (
+            <div className="w-full space-y-3">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-14 w-full rounded-lg bg-card" />
+              ))}
+            </div>
+          ) : (
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, i) => (
+                <AccordionItem key={faq.id} value={`faq-${i}`} className="mb-3 rounded-lg border border-border bg-card px-5">
+                  <AccordionTrigger className="text-left font-display text-lg hover:text-gold hover:no-underline">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">{faq.answer}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 rounded-lg gold-border bg-card p-8 text-center">
             <Icon name="MessagesSquare" size={32} className="text-gold" />

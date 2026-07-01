@@ -1,0 +1,36 @@
+{
+  "tests": [
+    {
+      "name": "Get cars public",
+      "method": "GET",
+      "path": "/?section=cars",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Get faqs public",
+      "method": "GET",
+      "path": "/?section=faqs",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Unknown section",
+      "method": "GET",
+      "path": "/?section=unknown",
+      "expectedStatus": 400
+    },
+    {
+      "name": "Create car without admin forbidden",
+      "method": "POST",
+      "path": "/?section=cars",
+      "body": {"name": "Test", "brand": "Test", "car_class": "Люкс", "price_per_day": 1000, "year": 2024, "power": 100, "transmission": "Автомат", "fuel": "Бензин", "seats": 4},
+      "expectedStatus": 403
+    },
+    {
+      "name": "Create booking public allowed",
+      "method": "POST",
+      "path": "/?section=bookings",
+      "body": {"name": "Тест", "phone": "+70000000000", "message": "Заявка"},
+      "expectedStatus": 200
+    }
+  ]
+}

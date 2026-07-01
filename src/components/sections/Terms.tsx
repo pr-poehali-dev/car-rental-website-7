@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Accordion,
   AccordionContent,
@@ -7,24 +9,15 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import Icon from '@/components/ui/icon';
+import { contentApi } from '@/lib/api';
 
-const conditions = [
-  {
-    icon: 'IdCard',
-    title: 'Требования к водителю',
-    text: 'Возраст от 23 лет, водительский стаж от 3 лет, российский или международный паспорт.',
-  },
-  {
-    icon: 'Wallet',
-    title: 'Депозит',
-    text: 'Возвратный залог от 30 000 ₽ блокируется на карте и возвращается после сдачи авто.',
-  },
-  {
-    icon: 'Fuel',
-    title: 'Топливо',
-    text: 'Автомобиль выдаётся с полным баком и должен быть возвращён так же заправленным.',
-  },
-];
+interface Condition {
+  id: number;
+  icon: string;
+  title: string;
+  text: string;
+  sort_order?: number;
+}
 
 const rules = [
   {
@@ -46,6 +39,17 @@ const rules = [
 ];
 
 const Terms = () => {
+  const [conditions, setConditions] = useState<Condition[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    contentApi
+      .list<Condition>('conditions')
+      .then(setConditions)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <section id="terms" className="py-24">
       <div className="container">
@@ -58,19 +62,23 @@ const Terms = () => {
 
         <div className="grid gap-12 lg:grid-cols-2">
           <div className="grid gap-5">
-            {conditions.map((c) => (
-              <Card key={c.title} className="border-border bg-card transition-colors hover:gold-border">
-                <CardContent className="flex items-start gap-4 pt-6">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm gold-gradient">
-                    <Icon name={c.icon} size={22} className="text-primary-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="mb-1 font-display text-xl font-semibold">{c.title}</h3>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{c.text}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {loading
+              ? [...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-28 w-full rounded-lg bg-card" />
+                ))
+              : conditions.map((c) => (
+                  <Card key={c.id} className="border-border bg-card transition-colors hover:gold-border">
+                    <CardContent className="flex items-start gap-4 pt-6">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm gold-gradient">
+                        <Icon name={c.icon} size={22} className="text-primary-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="mb-1 font-display text-xl font-semibold">{c.title}</h3>
+                        <p className="text-sm leading-relaxed text-muted-foreground">{c.text}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
           </div>
 
           <Accordion type="single" collapsible className="w-full">

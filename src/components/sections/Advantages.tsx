@@ -1,41 +1,30 @@
+import { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import Icon from '@/components/ui/icon';
+import { contentApi } from '@/lib/api';
 
-const items = [
-  {
-    icon: 'ShieldCheck',
-    title: 'Полная страховка',
-    text: 'КАСКО и ОСАГО включены в стоимость. Вы защищены в любой поездке.',
-  },
-  {
-    icon: 'Truck',
-    title: 'Доставка авто',
-    text: 'Привезём автомобиль к подъезду, в аэропорт или отель бесплатно.',
-  },
-  {
-    icon: 'Clock',
-    title: 'Поддержка 24/7',
-    text: 'Персональный менеджер на связи круглосуточно, без выходных.',
-  },
-  {
-    icon: 'Sparkles',
-    title: 'Идеальное состояние',
-    text: 'Детейлинг и техосмотр перед каждой выдачей автомобиля.',
-  },
-  {
-    icon: 'CreditCard',
-    title: 'Удобная оплата',
-    text: 'Картой, переводом или наличными. Прозрачные условия без скрытых платежей.',
-  },
-  {
-    icon: 'MapPin',
-    title: 'Геолокация',
-    text: 'Отслеживайте доставку и находите ближайшие точки выдачи на карте.',
-  },
-];
+interface Advantage {
+  id: number;
+  icon: string;
+  title: string;
+  text: string;
+  sort_order?: number;
+}
 
 const Advantages = () => {
+  const [items, setItems] = useState<Advantage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    contentApi
+      .list<Advantage>('advantages')
+      .then(setItems)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <section id="advantages" className="py-24 bg-secondary/30 noise-bg">
       <div className="container">
@@ -48,26 +37,34 @@ const Advantages = () => {
           </h2>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <Card
-              key={item.title}
-              className="group border-border bg-card transition-all duration-500 hover:gold-border hover:-translate-y-2"
-            >
-              <CardContent className="pt-8">
-                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-sm bg-secondary transition-colors group-hover:gold-gradient">
-                  <Icon
-                    name={item.icon}
-                    size={26}
-                    className="text-gold transition-colors group-hover:text-primary-foreground"
-                  />
-                </div>
-                <h3 className="mb-3 font-display text-2xl font-semibold">{item.title}</h3>
-                <p className="leading-relaxed text-muted-foreground">{item.text}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {loading ? (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-56 w-full rounded-lg bg-card" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <Card
+                key={item.id}
+                className="group border-border bg-card transition-all duration-500 hover:gold-border hover:-translate-y-2"
+              >
+                <CardContent className="pt-8">
+                  <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-sm bg-secondary transition-colors group-hover:gold-gradient">
+                    <Icon
+                      name={item.icon}
+                      size={26}
+                      className="text-gold transition-colors group-hover:text-primary-foreground"
+                    />
+                  </div>
+                  <h3 className="mb-3 font-display text-2xl font-semibold">{item.title}</h3>
+                  <p className="leading-relaxed text-muted-foreground">{item.text}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

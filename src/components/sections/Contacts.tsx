@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { contentApi } from '@/lib/api';
 import Icon from '@/components/ui/icon';
 
 const contacts = [
@@ -16,6 +18,30 @@ const contacts = [
 
 const Contacts = () => {
   const { toast } = useToast();
+  const [form, setForm] = useState({ name: '', phone: '', message: '' });
+  const [sending, setSending] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      await contentApi.create('bookings', {
+        name: form.name,
+        phone: form.phone,
+        message: form.message,
+        status: 'new',
+      });
+      toast({
+        title: 'Заявка отправлена!',
+        description: 'Наш менеджер свяжется с вами в течение 15 минут.',
+      });
+      setForm({ name: '', phone: '', message: '' });
+    } catch (err) {
+      toast({ title: 'Ошибка', description: (err as Error).message, variant: 'destructive' });
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <section className="py-24 noise-bg">
@@ -44,24 +70,29 @@ const Contacts = () => {
 
           <Card className="gold-border bg-card">
             <CardContent className="pt-6">
-              <form
-                className="space-y-4"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  toast({
-                    title: 'Заявка отправлена!',
-                    description: 'Наш менеджер свяжется с вами в течение 15 минут.',
-                  });
-                }}
-              >
+              <form className="space-y-4" onSubmit={submit}>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name">Имя</Label>
-                    <Input id="name" placeholder="Ваше имя" className="border-border bg-background" required />
+                    <Input
+                      id="name"
+                      placeholder="Ваше имя"
+                      className="border-border bg-background"
+                      required
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="phone">Телефон</Label>
-                    <Input id="phone" placeholder="+7 (___) ___-__-__" className="border-border bg-background" required />
+                    <Input
+                      id="phone"
+                      placeholder="+7 (___) ___-__-__"
+                      className="border-border bg-background"
+                      required
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -70,13 +101,16 @@ const Contacts = () => {
                     id="msg"
                     placeholder="Какой автомобиль вас интересует?"
                     className="min-h-32 border-border bg-background"
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
                   />
                 </div>
                 <Button
                   type="submit"
+                  disabled={sending}
                   className="w-full gold-gradient font-medium text-primary-foreground hover:opacity-90"
                 >
-                  Отправить заявку
+                  {sending ? 'Отправка...' : 'Отправить заявку'}
                   <Icon name="Send" size={16} className="ml-2" />
                 </Button>
               </form>
