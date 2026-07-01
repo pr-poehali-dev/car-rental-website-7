@@ -1,16 +1,39 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Layout from '@/components/layout/Layout';
+import Hero from '@/components/sections/Hero';
+import BookingBar from '@/components/sections/BookingBar';
+import Catalog from '@/components/sections/Catalog';
+import About from '@/components/sections/About';
+import Advantages from '@/components/sections/Advantages';
+import Gallery from '@/components/sections/Gallery';
+import HowItWorks from '@/components/sections/HowItWorks';
+import Pricing from '@/components/sections/Pricing';
+import Insurance from '@/components/sections/Insurance';
+import Reviews from '@/components/sections/Reviews';
+import Terms from '@/components/sections/Terms';
+import Blog from '@/components/sections/Blog';
+import Faq from '@/components/sections/Faq';
+import CtaBanner from '@/components/sections/CtaBanner';
+import Contacts from '@/components/sections/Contacts';
 
 const Index = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4 color-black text-black">Добро пожаловать!</h1>
-        <p className="text-xl text-gray-600">тут будет отображаться ваш проект</p>
-      </div>
-      <span className="absolute bottom-8 left-1/2 -translate-x-1/2 inline-block bg-[#FF6637] text-white text-sm px-4 py-2 rounded-full whitespace-nowrap">
-        Подождите 5 минут, Юра создает первую версию проекта с нуля
-      </span>
-    </div>
+    <Layout>
+      <Hero />
+      <BookingBar />
+      <Catalog />
+      <About />
+      <Advantages />
+      <Gallery />
+      <HowItWorks />
+      <Pricing />
+      <Insurance />
+      <Reviews />
+      <Terms />
+      <Blog />
+      <Faq />
+      <CtaBanner />
+      <Contacts />
+    </Layout>
   );
 };
 
